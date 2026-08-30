@@ -1,0 +1,15 @@
+{
+  "name": "@dsh-graph-control/studio",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@dsh-graph-control/dsh-adapter": "workspace:*",
+    "@dsh-graph-control/edit-transaction": "workspace:*",
+    "@dsh-graph-control/harness-graph": "workspace:*",
+    "@dsh-graph-control/profile-edit": "workspace:*",
+    "@phosphor-icons/web": "2.1.2",
+    "cytoscape": "3.34.1",
+    "yaml": "2.9.0"
+  }
+}

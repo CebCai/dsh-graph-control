@@ -1,0 +1,11 @@
+{
+  "name": "@dsh-graph-control/cli",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@dsh-graph-control/constraint-engine": "workspace:*",
+    "@dsh-graph-control/dsh-adapter": "workspace:*",
+    "@dsh-graph-control/profile-edit": "workspace:*"
+  }
+}

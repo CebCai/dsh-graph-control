@@ -1,0 +1,83 @@
+name: Bug report
+description: Report a reproducible GraphControl problem
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting a problem. Remove credentials, private configuration, and identifying local paths before submitting.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Describe the behavior and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open...
+        2. Select...
+        3. Preview...
+    validations:
+      required: true
+  - type: dropdown
+    id: action
+    attributes:
+      label: Where did it fail?
+      options:
+        - Open or switch Harness
+        - Inspect graph or dependencies
+        - Preview a change
+        - Apply a change
+        - Hosted launch
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: graphcontrol
+    attributes:
+      label: GraphControl commit
+      placeholder: Git commit or branch
+    validations:
+      required: true
+  - type: input
+    id: dsh
+    attributes:
+      label: Official DSH release or version
+      placeholder: For example, dsh-v0.1.2-alpha.2
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: Windows, Node.js, and browser versions
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Redacted logs or screenshots
+      description: Optional. Do not include tokens, credentials, or private paths.
+  - type: dropdown
+    id: write
+    attributes:
+      label: Did Apply write configuration before the failure?
+      options:
+        - Apply was not involved
+        - No
+        - Yes
+        - Unsure
+    validations:
+      required: true
+  - type: checkboxes
+    id: redaction
+    attributes:
+      label: Redaction check
+      options:
+        - label: I removed tokens, credentials, private configuration, and identifying local paths.
+          required: true

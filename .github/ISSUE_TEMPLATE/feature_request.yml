@@ -1,0 +1,24 @@
+name: Feature request
+description: Propose a user-facing GraphControl improvement
+title: "[Feature]: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: outcome
+    attributes:
+      label: What should the user be able to do?
+      description: Describe the desired outcome rather than an internal implementation.
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Why is this useful?
+      description: Explain the current workflow or limitation.
+    validations:
+      required: true
+  - type: textarea
+    id: dsh
+    attributes:
+      label: Relevant DSH component or capability
+      description: Include the official component, Provider, or profile when known.

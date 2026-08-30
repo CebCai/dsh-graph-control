@@ -1,0 +1,14 @@
+{
+  "name": "@dsh-graph-control/dsh-adapter",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@dsh-graph-control/edit-transaction": "workspace:*",
+    "@dsh-graph-control/harness-graph": "workspace:*",
+    "yaml": "2.9.0"
+  }
+}

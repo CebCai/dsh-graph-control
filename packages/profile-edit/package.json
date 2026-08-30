@@ -1,0 +1,13 @@
+{
+  "name": "@dsh-graph-control/profile-edit",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@dsh-graph-control/constraint-engine": "workspace:*",
+    "@dsh-graph-control/dsh-adapter": "workspace:*"
+  }
+}

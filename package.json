@@ -1,0 +1,50 @@
+{
+  "name": "dsh-graph-control",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "description": "A local visual console for understanding and configuring DeepSeek Harness.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CebCai/dsh-graph-control.git"
+  },
+  "homepage": "https://github.com/CebCai/dsh-graph-control#readme",
+  "bugs": {
+    "url": "https://github.com/CebCai/dsh-graph-control/issues"
+  },
+  "keywords": [
+    "deepseek-harness",
+    "visual-editor",
+    "developer-tools",
+    "local-first",
+    "typescript",
+    "configuration"
+  ],
+  "type": "module",
+  "packageManager": "pnpm@11.19.0",
+  "engines": {
+    "node": "^22.19.0 || >=24.0.0"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "check": "pnpm typecheck && pnpm test",
+    "test": "vitest run packages/edit-transaction/tests/transaction.spec.ts",
+    "test:official:smoke": "vitest run packages/dsh-adapter/tests/official-smoke.integration.spec.ts apps/studio/tests/official-host.integration.spec.ts",
+    "inspect": "node apps/cli/src/index.ts inspect",
+    "studio": "node apps/studio/src/index.ts",
+    "studio:official": "node apps/studio/src/hosted.ts",
+    "plan:scalar": "node apps/cli/src/index.ts plan-scalar",
+    "apply:scalar": "node apps/cli/src/index.ts apply-scalar",
+    "plan:provider": "node apps/cli/src/index.ts plan-provider",
+    "apply:provider": "node apps/cli/src/index.ts apply-provider",
+    "plan:picker": "node apps/cli/src/index.ts plan-picker",
+    "apply:picker": "node apps/cli/src/index.ts apply-picker",
+    "dsh:bootstrap": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/bootstrap-official-dsh.ps1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "6.0.3",
+    "vitest": "4.1.8",
+    "yaml": "2.9.0"
+  }
+}

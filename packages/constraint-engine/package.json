@@ -1,0 +1,12 @@
+{
+  "name": "@dsh-graph-control/constraint-engine",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@dsh-graph-control/harness-graph": "workspace:*"
+  }
+}

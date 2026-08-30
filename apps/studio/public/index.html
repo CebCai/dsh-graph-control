@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <title>DSH GraphControl · DeepSeek Harness 控制台</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23101a2a'/%3E%3Cpath d='M17 18h14c11 0 18 5 18 14S42 46 31 46H17V18Zm10 8v12h5c5 0 8-2 8-6s-3-6-8-6h-5Z' fill='%236c9dff'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="./vendor/phosphor/style.css">
+  <link rel="stylesheet" href="./styles.css?v=20260830">
+</head>
+<body data-active-section="composer">
+  <a class="skip-link" href="#mainContent" data-i18n="accessibility.skip">跳到主要内容</a>
+  <div id="app" class="app" aria-busy="true">
+    <header class="topbar">
+      <a class="brand" href="#composer" aria-label="DSH GraphControl">
+        <span class="brand-prefix">DSH</span>
+        <strong>GraphControl</strong>
+      </a>
+
+      <div class="topbar-divider" aria-hidden="true"></div>
+      <div class="harness-context-control">
+        <button id="harnessContextTrigger" class="context-menu" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="harnessContextPopover" aria-label="选择当前 Harness" data-i18n-aria="context.trigger">
+          <i class="ph ph-circles-three" aria-hidden="true"></i>
+          <span id="harnessContextLabel">正在读取 Harness…</span>
+          <i class="ph ph-caret-down" aria-hidden="true"></i>
+        </button>
+        <section id="harnessContextPopover" class="harness-context-popover" role="dialog" aria-labelledby="harnessContextTitle" hidden>
+          <div class="harness-context-heading">
+            <span class="harness-context-icon"><i class="ph ph-circles-three" aria-hidden="true"></i></span>
+            <div>
+              <p class="eyebrow" data-i18n="context.eyebrow">当前 Harness</p>
+              <h2 id="harnessContextTitle" data-i18n="context.title">选择要设计的 DSH 配置</h2>
+            </div>
+          </div>
+          <p class="harness-context-intro" data-i18n="context.intro">每次切换都会从本机官方 DSH 重新读取，不会修改配置文件。</p>
+          <div id="harnessProfileList" class="harness-profile-list"></div>
+          <dl class="harness-context-facts compact">
+            <div><dt data-i18n="context.workspace">工作区</dt><dd id="contextWorkspace">—</dd></div>
+            <div><dt data-i18n="context.version">官方 DSH</dt><dd id="contextVersion">—</dd></div>
+          </dl>
+          <p id="harnessContextWarning" class="harness-context-warning" data-i18n="context.warning">切换或重新读取会丢弃尚未应用的预览。</p>
+          <p id="harnessContextError" class="harness-context-error" hidden></p>
+          <button id="harnessContextReload" class="harness-context-reload" type="button">
+            <i class="ph ph-arrow-clockwise" aria-hidden="true"></i>
+            <span data-i18n="context.reload">重新读取当前 Harness</span>
+          </button>
+        </section>
+      </div>
+      <div class="connection" aria-live="polite">
+        <span class="connection-dot" aria-hidden="true"></span>
+        <span id="connectionText">正在连接本机 DSH…</span>
+      </div>
+      <div class="topbar-divider" aria-hidden="true"></div>
+      <div class="breadcrumb" aria-label="当前位置" data-i18n-aria="header.locationAria">
+        <i class="ph ph-folder" aria-hidden="true"></i>
+        <span id="workspaceBreadcrumb" data-i18n="header.breadcrumb">设计 /</span>
+        <label class="service-picker breadcrumb-service-picker">
+          <span class="sr-only" data-i18n="composer.service">能力</span>
+          <select id="composerServiceSelect"></select>
+        </label>
+      </div>
+
+      <label class="capability-search">
+        <span class="sr-only" data-i18n="composer.searchLabel">添加能力</span>
+        <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
+        <input id="capabilitySearch" type="search" autocomplete="off" placeholder="添加能力（搜索能力或组件）" data-i18n-placeholder="composer.searchPlaceholder">
+        <kbd>⌘ K</kbd>
+      </label>
+
+      <div class="topbar-actions">
+        <div id="languageSwitch" class="language-switch" role="group" aria-label="界面语言" data-i18n-aria="locale.aria">
+          <button type="button" data-locale="zh" aria-pressed="true">中文</button>
+          <button type="button" data-locale="en" aria-pressed="false">EN</button>
+        </div>
+        <div id="themeSwitch" class="theme-switch" role="group" aria-label="外观主题" data-i18n-aria="theme.aria">
+          <button type="button" data-theme-value="light" aria-label="浅色" data-i18n-aria="theme.light" aria-pressed="false">
+            <i class="ph ph-sun" aria-hidden="true"></i>
+          </button>
+          <button type="button" data-theme-value="dark" aria-label="深色" data-i18n-aria="theme.dark" aria-pressed="true">
+            <i class="ph ph-moon" aria-hidden="true"></i>
+          </button>
+        </div>
+        <div class="profile-chip" title="当前 DSH profile">
+          <span data-i18n="header.profile">配置</span>
+          <strong id="profileName">—</strong>
+        </div>
+      </div>
+    </header>
+
+    <main id="mainContent" class="shell">
+      <aside class="nav-rail">
+        <nav class="rail-nav" aria-label="页面导航" data-i18n-aria="nav.aria">
+          <a href="#composer" data-section="composer" aria-label="设计" data-i18n-aria="nav.composer" aria-current="page">
+            <i class="ph ph-squares-four" aria-hidden="true"></i>
+            <span data-i18n="nav.composer">设计</span>
+          </a>
+          <a href="#topology" data-section="topology" aria-label="依赖" data-i18n-aria="nav.topology">
+            <i class="ph ph-share-network" aria-hidden="true"></i>
+            <span data-i18n="nav.topology">依赖</span>
+          </a>
+          <a href="#changes" data-section="changes" aria-label="变更" data-i18n-aria="nav.changes">
+            <i class="ph ph-wrench" aria-hidden="true"></i>
+            <span data-i18n="nav.changes">变更</span>
+          </a>
+          <a href="#overview" data-section="overview" aria-label="概览" data-i18n-aria="nav.overview">
+            <i class="ph ph-gauge" aria-hidden="true"></i>
+            <span data-i18n="nav.overview">概览</span>
+          </a>
+        </nav>
+        <a class="developer-link" href="#system" data-section="system" aria-label="系统状态" data-i18n-aria="nav.system">
+          <i class="ph ph-pulse" aria-hidden="true"></i>
+          <span data-i18n="nav.system">系统状态</span>
+        </a>
+      </aside>
+
+      <section class="workspace" aria-label="Harness 控制台" data-i18n-aria="workspace.aria">
+        <section id="composer" class="composer workspace-view" data-workspace-view="composer" aria-labelledby="composerTitle">
+          <h1 id="composerTitle" class="sr-only" data-i18n="composer.title">设计 Harness</h1>
+          <ol id="composerGuide" class="sr-only" aria-label="修改步骤" data-i18n-aria="composer.guideAria">
+            <li data-guide-step="1" class="active"><span>1</span><strong data-i18n="composer.step1">选择组件</strong></li>
+            <li data-guide-step="2"><span>2</span><strong data-i18n="composer.step2">预览修改</strong></li>
+            <li data-guide-step="3"><span>3</span><strong data-i18n="composer.step3">应用修改</strong></li>
+          </ol>
+
+          <div class="design-surface">
+            <div class="composer-commandbar">
+              <div class="composer-toolbar-actions">
+                <div id="composerScope" class="composer-scope" role="group" aria-label="查看范围" data-i18n-aria="composer.scopeAria">
+                  <button type="button" data-composer-scope="focus" class="active" data-i18n="composer.scopeFocus">当前能力</button>
+                  <button type="button" data-composer-scope="resolved" data-i18n="composer.scopeResolved">完整配置</button>
+                </div>
+                <span id="composerNodeCount" class="node-count">0</span>
+                <button id="composerArrange" type="button" class="icon-action" aria-label="自动整理" data-i18n-aria="composer.arrange">
+                  <i class="ph ph-tree-structure" aria-hidden="true"></i>
+                </button>
+                <button id="composerFit" type="button" class="icon-action" aria-label="适应画布" data-i18n-aria="composer.fit">
+                  <i class="ph ph-corners-out" aria-hidden="true"></i>
+                </button>
+                <button id="composerReset" type="button" class="icon-action" aria-label="重置布局" data-i18n-aria="composer.reset">
+                  <i class="ph ph-arrow-counter-clockwise" aria-hidden="true"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="canvas-workspace">
+              <div class="canvas-regions" aria-hidden="true">
+                <span class="region-label region-provider" data-i18n="composer.regionProviders">能力提供者</span>
+                <span class="region-label region-capability" data-i18n="composer.regionCapability">当前能力</span>
+                <span class="region-label region-consumers" data-i18n="composer.regionConsumers">连接的组件</span>
+              </div>
+              <div id="composerCanvas" class="composer-canvas" role="application" aria-label="Harness 图画布" data-i18n-aria="composer.canvasAria"></div>
+              <div class="composer-status-wrap">
+                <span class="composer-live-dot" aria-hidden="true"></span>
+                <span id="composerStatus" class="composer-status" data-state="layout" aria-live="polite">拖动节点只会调整本机布局。</span>
+              </div>
+
+              <aside id="detailPanel" class="detail-panel" aria-labelledby="detailTitle">
+                <div class="detail-panel-heading">
+                  <div>
+                    <p class="eyebrow" data-i18n="details.eyebrow">当前选中</p>
+                    <h2 id="detailTitle" data-i18n="details.title">组件详情</h2>
+                  </div>
+                  <div class="detail-heading-actions">
+                    <span id="detailPlane" class="plane-badge">—</span>
+                    <button id="detailClose" class="detail-close" type="button" aria-label="关闭组件详情" data-i18n-aria="details.close">
+                      <i class="ph ph-x" aria-hidden="true"></i>
+                    </button>
+                  </div>
+                </div>
+                <div id="detailContent" class="detail-content">
+                  <p class="empty-state" data-i18n="details.empty">选择一个组件，查看它的作用和连接关系。</p>
+                </div>
+              </aside>
+            </div>
+
+            <section class="capability-dock" aria-labelledby="capabilityDockTitle">
+              <div class="capability-dock-heading">
+                <div>
+                  <h2 id="capabilityDockTitle" data-i18n="composer.candidates">添加能力</h2>
+                  <p data-i18n="composer.candidateHelp">选择想完成的事情；系统会先预览影响，不会直接修改配置。</p>
+                </div>
+                <label class="dock-search">
+                  <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
+                  <input id="dockSearch" type="search" autocomplete="off" placeholder="搜索能力或组件" data-i18n-placeholder="composer.dockSearchPlaceholder">
+                </label>
+              </div>
+              <div class="capability-categories" role="group" aria-label="能力类别" data-i18n-aria="composer.categoriesAria">
+                <button type="button" class="active" aria-pressed="true" data-capability-filter="all" data-i18n="composer.categoryRecommended">推荐</button>
+                <button type="button" aria-pressed="false" data-capability-filter="context" data-i18n="composer.categoryContext">上下文</button>
+                <button type="button" aria-pressed="false" data-capability-filter="storage" data-i18n="composer.categoryStorage">文件与存储</button>
+                <button type="button" aria-pressed="false" data-capability-filter="interaction" data-i18n="composer.categoryInteraction">互动</button>
+                <button type="button" aria-pressed="false" data-capability-filter="integration" data-i18n="composer.categoryIntegration">外部工具</button>
+                <button type="button" aria-pressed="false" data-capability-filter="tools" data-i18n="composer.categoryTools">工具</button>
+              </div>
+              <div id="composerCandidateShelf" class="composer-candidate-shelf"></div>
+            </section>
+          </div>
+
+          <aside class="review-panel" aria-labelledby="reviewPanelTitle">
+            <div class="review-panel-heading">
+              <div>
+                <p class="eyebrow" data-i18n="review.eyebrow">写入前确认</p>
+                <h2 id="reviewPanelTitle" data-i18n="review.title">待应用的修改</h2>
+              </div>
+              <i class="ph ph-list-checks" aria-hidden="true"></i>
+            </div>
+            <section id="composerDraftRail" class="composer-draft-rail" aria-live="polite"></section>
+          </aside>
+        </section>
+
+        <section id="topology" class="topology panel workspace-view" data-workspace-view="topology" aria-labelledby="topologyTitle" hidden>
+          <div class="panel-heading topology-heading">
+            <div>
+              <p class="eyebrow" data-i18n="topology.eyebrow">依赖关系</p>
+              <h2 id="topologyTitle" data-i18n="topology.title">谁提供能力，谁依赖它</h2>
+              <p class="section-intro" data-i18n="topology.intro">查看当前能力的提供者和使用方。</p>
+            </div>
+            <label class="service-picker">
+              <span data-i18n="topology.service">能力</span>
+              <select id="serviceSelect"></select>
+            </label>
+          </div>
+          <div id="topologyFlow" class="topology-flow"></div>
+          <p id="topologyEvidence" class="evidence-line"></p>
+        </section>
+
+        <section id="overview" class="settings-view workspace-view" data-workspace-view="overview" hidden>
+          <section id="overviewHero" class="hero panel">
+            <div class="hero-copy">
+              <p class="eyebrow" data-i18n="hero.eyebrow">Harness 概览</p>
+              <h2 data-i18n="hero.title">掌握当前 Harness 的配置与运行边界</h2>
+              <p class="hero-lead" data-i18n="hero.lead">从一个位置查看配置上下文、能力关系、执行环境与可用变更。</p>
+              <p id="profilePath" class="hero-subtitle">正在载入配置…</p>
+            </div>
+            <div id="summaryStats" class="summary-stats" aria-label="Harness 概览统计" data-i18n-aria="stats.aria"></div>
+          </section>
+
+          <section class="harness-settings panel" aria-labelledby="harnessSettingsTitle">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow" data-i18n="context.eyebrow">当前 Harness</p>
+                <h2 id="harnessSettingsTitle" data-i18n="context.settingsTitle">Harness 上下文</h2>
+                <p class="section-intro" data-i18n="context.settingsIntro">确认当前配置、官方 DSH 安装与工作区，或切换已有的本机 Harness。</p>
+              </div>
+              <span id="harnessContextStatus" class="context-source-badge" data-i18n="context.official">官方 DSH 组合</span>
+            </div>
+            <div class="harness-settings-layout">
+              <div>
+                <p class="harness-settings-label" data-i18n="context.profiles">本机配置</p>
+                <div id="settingsProfileList" class="harness-profile-list settings"></div>
+                <button id="settingsHarnessReload" class="harness-context-reload settings" type="button">
+                  <i class="ph ph-arrow-clockwise" aria-hidden="true"></i>
+                  <span data-i18n="context.reload">重新读取当前 Harness</span>
+                </button>
+              </div>
+              <dl class="harness-context-facts">
+                <div><dt data-i18n="context.dshHome">DSH 数据目录</dt><dd id="settingsDshHome">—</dd></div>
+                <div><dt data-i18n="context.installation">官方 DSH 安装</dt><dd id="settingsInstallation">—</dd></div>
+                <div><dt data-i18n="context.workspace">工作区</dt><dd id="settingsWorkspace">—</dd></div>
+              </dl>
+            </div>
+            <p class="harness-settings-note" data-i18n="context.settingsNote">GraphControl 只记住界面布局；Harness 内容始终由所选 DSH 配置决定。</p>
+            <details id="openLocalHarnessDisclosure" class="harness-open-disclosure">
+              <summary id="harnessOpenSummary" aria-disabled="false">
+                <span data-i18n="context.openAnother">打开另一个本机 Harness</span>
+                <i class="ph ph-caret-down" aria-hidden="true"></i>
+              </summary>
+              <div class="harness-open-body">
+                <p id="harnessOpenIntro" class="harness-open-intro" data-i18n="context.openIntro">提供已构建的官方 DSH 安装文件夹和已有的 DSH 数据文件夹。检查只读取版本与已初始化配置，不会创建配置或执行候选 DSH。</p>
+                <p id="harnessOpenOverlayWarning" class="harness-open-overlay-warning" role="status" hidden data-i18n="context.openOverlayBlocked">当前 Studio 启动时附加了额外配置层。为避免切换时遗漏这些设置，暂不能检查或打开另一个 Harness。</p>
+                <form id="harnessContextCheckForm" class="harness-open-form" novalidate>
+                  <label class="harness-open-field" for="harnessInstallationRoot">
+                    <span data-i18n="context.installationFolder">官方 DSH 安装文件夹</span>
+                    <input id="harnessInstallationRoot" name="installationRoot" type="text" required autocomplete="off" autocapitalize="none" spellcheck="false" aria-describedby="harnessInstallationHelp">
+                    <small id="harnessInstallationHelp" data-i18n="context.installationFolderHelp">选择已安装依赖并完成构建的官方 DSH 源码目录。</small>
+                  </label>
+                  <label class="harness-open-field" for="harnessDshHome">
+                    <span data-i18n="context.dataFolder">已有 DSH 数据文件夹</span>
+                    <input id="harnessDshHome" name="dshHome" type="text" required autocomplete="off" autocapitalize="none" spellcheck="false" aria-describedby="harnessDshHomeHelp">
+                    <small id="harnessDshHomeHelp" data-i18n="context.dataFolderHelp">检查只发现其中已经初始化的配置；只有后续独立预览和确认才可能初始化缺失的内置 web 配置。</small>
+                  </label>
+                  <div class="harness-open-check-row">
+                    <button id="harnessContextCheck" class="harness-open-check" type="submit">
+                      <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
+                      <span id="harnessContextCheckLabel" data-i18n="context.check">检查</span>
+                    </button>
+                  </div>
+                </form>
+                <p id="harnessOpenStatus" class="harness-open-status" role="status" aria-live="polite"></p>
+                <p id="harnessOpenError" class="harness-open-error" role="alert" tabindex="-1" hidden></p>
+                <section id="harnessOpenCandidate" class="harness-open-candidate" aria-labelledby="harnessOpenCandidateTitle" tabindex="-1" hidden>
+                  <div class="harness-open-candidate-heading">
+                    <div>
+                      <span id="harnessOpenCandidateTitle" data-i18n="context.checkedVersion">已检查的官方 DSH</span>
+                      <strong id="harnessOpenVersion">—</strong>
+                    </div>
+                    <span class="harness-open-ready" data-i18n="context.checkComplete">检查完成</span>
+                  </div>
+                  <fieldset id="harnessOpenProfileFieldset" class="harness-open-profiles">
+                    <legend data-i18n="context.initializedProfiles">选择已初始化的配置</legend>
+                    <div id="harnessOpenProfileList" class="harness-open-profile-list"></div>
+                  </fieldset>
+                  <p id="harnessOpenEmpty" class="harness-open-empty" hidden data-i18n="context.noInitializedProfiles">没有找到已初始化的配置；GraphControl 未创建任何内容。</p>
+                  <section id="harnessInitialize" class="harness-initialize" aria-labelledby="harnessInitializeTitle" hidden>
+                    <div class="harness-initialize-copy">
+                      <strong id="harnessInitializeTitle" data-i18n="context.initializeTitle">初始化官方 Web 配置</strong>
+                      <p id="harnessInitializeIntro" data-i18n="context.initializeIntro">所选数据目录还没有内置 web 配置。预览会执行你选择并信任的本机官方 DSH，但把 DSH Home 指向临时目录；它只隔离配置写入，不是代码沙箱，也不会写入所选数据目录。</p>
+                      <p id="harnessInitializeReady" class="harness-initialize-ready" role="status" hidden data-i18n="context.initializeReady">官方 DSH 已确认可以初始化缺失的 web 配置。只有下一步确认后才会写入所选数据目录。</p>
+                    </div>
+                    <div class="harness-initialize-actions">
+                      <button id="harnessInitializePreview" class="harness-open-check" type="button">
+                        <i class="ph ph-eye" aria-hidden="true"></i>
+                        <span id="harnessInitializePreviewLabel" data-i18n="context.initializePreview">预览官方初始化</span>
+                      </button>
+                      <button id="harnessInitializeApply" class="harness-open-submit" type="button" hidden>
+                        <i class="ph ph-plus-circle" aria-hidden="true"></i>
+                        <span id="harnessInitializeApplyLabel" data-i18n="context.initializeApply">初始化并打开</span>
+                      </button>
+                    </div>
+                  </section>
+                  <p id="harnessOpenTrustWarning" class="harness-open-trust-warning" data-i18n="context.openTrustWarning">打开或初始化预览会执行你所选择并信任的本机官方 DSH 安装与配置代码。成功前不会替换当前 Harness。</p>
+                  <p id="harnessOpenPendingWarning" class="harness-open-pending-warning" data-i18n="context.openPendingWarning">打开另一个 Harness 会丢弃当前尚未应用的预览；GraphControl 会在需要时再次确认。</p>
+                  <div class="harness-open-actions">
+                    <button id="harnessContextOpen" class="harness-open-submit" type="button" disabled>
+                      <i class="ph ph-folder-open" aria-hidden="true"></i>
+                      <span id="harnessContextOpenLabel" data-i18n="context.open">打开 Harness</span>
+                    </button>
+                  </div>
+                </section>
+              </div>
+            </details>
+          </section>
+
+          <section id="worlds" class="execution-worlds panel" aria-labelledby="executionWorldsTitle">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow" data-i18n="worlds.eyebrow">运行边界</p>
+                <h2 id="executionWorldsTitle" data-i18n="worlds.title">执行环境</h2>
+                <p class="section-intro" data-i18n="worlds.intro">查看文件系统与命令能力位于哪里，以及它们是否组成一致的执行环境。</p>
+              </div>
+              <span id="executionWorldCount" class="count-pill">0</span>
+            </div>
+            <div id="executionWorldGrid" class="execution-world-grid"></div>
+            <p id="executionWorldEvidence" class="evidence-line"></p>
+          </section>
+
+          <section id="sources" class="sources-panel panel" aria-labelledby="sourcesTitle">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow" data-i18n="sources.eyebrow">配置上下文</p>
+                <h2 id="sourcesTitle" data-i18n="sources.title">DSH 配置层</h2>
+              </div>
+              <span id="layerCount" class="count-pill">0</span>
+            </div>
+            <p class="panel-intro" data-i18n="sources.intro">按照实际生效顺序显示当前 Harness 的配置层。</p>
+            <ol id="layerList" class="layer-list"></ol>
+            <div class="truth-note">
+              <strong data-i18n="sources.truthTitle">官方 DSH 配置</strong>
+              <p data-i18n="sources.truthBody">控制台从所选 DSH 配置读取并写回受支持的变更，不维护平行配置副本。</p>
+            </div>
+          </section>
+        </section>
+
+        <section id="system" class="developer-view workspace-view" data-workspace-view="system" hidden>
+          <section id="diagnosticBanner" class="diagnostic-banner" hidden aria-live="polite"></section>
+          <section class="developer-diagnostics panel" aria-labelledby="developerDiagnosticsTitle">
+            <div class="panel-heading">
+              <div>
+                <p id="developerDiagnosticsEyebrow" class="eyebrow">系统状态</p>
+                <h2 id="developerDiagnosticsTitle">Harness 环境与就绪状态</h2>
+                <p id="developerDiagnosticsIntro" class="section-intro">按需检查当前本机环境、配置来源和可用的执行条件。</p>
+              </div>
+              <button id="developerDiagnosticsLoad" class="developer-diagnostics-load" type="button">检查系统状态</button>
+            </div>
+            <p id="developerDiagnosticsStatus" class="developer-diagnostics-status" role="status"></p>
+            <details id="developerDiagnosticsContent" class="developer-details" hidden>
+              <summary>
+                <span id="developerDetailsSummary">开发者详情</span>
+                <small id="developerDetailsCopy">配置路径、包状态与远程执行研究</small>
+              </summary>
+              <div class="developer-details-body">
+                <dl class="developer-context-facts">
+                  <div><dt id="developerProfilePathLabel">配置目录</dt><dd id="developerProfilePath">—</dd></div>
+                  <div><dt id="developerDshHomeLabel">DSH 数据目录</dt><dd id="developerDshHome">—</dd></div>
+                  <div><dt id="developerInstallationLabel">官方 DSH 安装</dt><dd id="developerInstallation">—</dd></div>
+                  <div><dt id="developerWorkspaceLabel">工作区</dt><dd id="developerWorkspace">—</dd></div>
+                </dl>
+                <div class="developer-layer-paths">
+                  <h3 id="developerLayerPathsTitle">配置层路径</h3>
+                  <ol id="developerLayerPaths"></ol>
+                </div>
+                <div id="remoteWorldReadiness" class="remote-world-readiness" hidden></div>
+              </div>
+            </details>
+          </section>
+          <section id="entities" class="catalog panel" aria-labelledby="catalogTitle">
+            <div class="panel-heading catalog-heading">
+              <div>
+                <p class="eyebrow" data-i18n="entities.eyebrow">配置清单</p>
+                <h2 id="catalogTitle" data-i18n="entities.title">组件与服务</h2>
+                <p class="section-intro" data-i18n="entities.intro">查看当前 Harness 中已声明和实际组合的组件、插件与服务。</p>
+              </div>
+              <span id="visibleCount" class="count-pill">0</span>
+            </div>
+            <div class="catalog-tools">
+              <label class="search-box">
+                <span class="sr-only" data-i18n="entities.searchLabel">搜索组件与服务</span>
+                <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
+                <input id="searchInput" type="search" placeholder="搜索条目、插件或服务…" data-i18n-placeholder="entities.searchPlaceholder" autocomplete="off">
+              </label>
+              <div id="planeTabs" class="plane-tabs" aria-label="配置状态筛选" data-i18n-aria="entities.planeAria">
+                <button type="button" data-plane="resolved" class="active" data-i18n="plane.resolved">实际生效</button>
+                <button type="button" data-plane="declared" data-i18n="plane.declared">配置声明</button>
+                <button type="button" data-plane="all" data-i18n="plane.all">全部</button>
+              </div>
+            </div>
+            <div id="entityList" class="entity-list" role="list"></div>
+          </section>
+        </section>
+      </section>
+    </main>
+  </div>
+  <div id="fatalError" class="fatal-error" hidden role="alert"></div>
+  <script src="./vendor/cytoscape/cytoscape.min.js" defer></script>
+  <script src="./composer.js?v=b31-provider-repair-3-20260824" defer></script>
+  <script src="./app.js?v=b31-provider-repair-3-20260824" defer></script>
+</body>
+</html>
